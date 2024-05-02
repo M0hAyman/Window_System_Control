@@ -1,4 +1,5 @@
-
+#ifndef TYPES_H
+#define TYPES_H
 
 typedef char int8;
 typedef unsigned char uint8;
@@ -18,3 +19,5 @@ typedef unsigned short int* uint16_ptr;
 
 typedef int* int32_ptr;
 typedef unsigned int* uint32_ptr;
+
+#endif 

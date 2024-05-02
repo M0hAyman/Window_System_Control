@@ -1,6 +1,8 @@
 #include "../Utilities/tm4c123gh6pm.h" 
 #include "../Utilities/bitwise_operation.h"
 #include "../Utilities/types.h"
+#ifndef DIO_H
+#define DIO_H
 #define NUM_PINS 8
 //6 Ports A-F
 #define PORT_A 'A'
@@ -33,3 +35,4 @@ uint8 DIO_SetupDirection(uint8 PORT,uint8 VALUE,uint8 pin);
 uint8 DIO_ReadPort(uint8 PORT);
 uint8 DIO_ReadPin(uint8 PORT,uint8 pin);
 
+#endif

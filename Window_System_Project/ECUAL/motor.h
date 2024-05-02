@@ -1,4 +1,8 @@
 #include "../MCAL/DIO.h"
+
+#ifndef MOTOR_H
+#define MOTOR_H
+
 void MOTOR_direction_init(uint8 motorPortDirectionControl1, uint8 motorPinDirectionControl1,
 						  uint8 motorPortDirectionControl2, uint8 motorPinDirectionControl2);
 
@@ -16,3 +20,5 @@ void MOTOR_rotateToggle(uint8 motorPortDirectionControl1, uint8 motorPinDirectio
 						uint8 motorPortDirectionControl2, uint8 motorPinDirectionControl2);
 void MOTOR_stop(uint8 motorPortDirectionControl1, uint8 motorPinDirectionControl1,
 				uint8 motorPortDirectionControl2, uint8 motorPinDirectionControl2);
+
+#endif

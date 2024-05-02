@@ -66,7 +66,7 @@ uint8 DIO_SetupDirection(uint8 PORT,uint8 direction,uint8 pin){
       }
       else if(direction == IN){
           Clear_Bit(GPIO_PORTA_DIR_R,pin);
-          Set_Bit(GPIO_PORTA_PUR_R,pin);
+         // Set_Bit(GPIO_PORTA_PUR_R,pin);
       }
    }
    break;
@@ -77,7 +77,7 @@ uint8 DIO_SetupDirection(uint8 PORT,uint8 direction,uint8 pin){
       }
       else if(direction == IN){
           Clear_Bit(GPIO_PORTB_DIR_R,pin);
-          Set_Bit(GPIO_PORTB_PUR_R,pin);
+          //Set_Bit(GPIO_PORTB_PUR_R,pin);
       }
    }
    break;
@@ -88,7 +88,7 @@ uint8 DIO_SetupDirection(uint8 PORT,uint8 direction,uint8 pin){
       }
       else if(direction == IN){
           Clear_Bit(GPIO_PORTC_DIR_R,pin);
-          Set_Bit(GPIO_PORTC_PUR_R,pin);
+         // Set_Bit(GPIO_PORTC_PUR_R,pin);
       }
    }
    break;
@@ -99,7 +99,7 @@ uint8 DIO_SetupDirection(uint8 PORT,uint8 direction,uint8 pin){
       }
       else if(direction == IN){
           Clear_Bit(GPIO_PORTD_DIR_R,pin);
-          Set_Bit(GPIO_PORTD_PUR_R,pin);
+       //   Set_Bit(GPIO_PORTD_PUR_R,pin);
       }
    }
    break;
@@ -110,7 +110,7 @@ uint8 DIO_SetupDirection(uint8 PORT,uint8 direction,uint8 pin){
       }
       else if(direction == IN){
           Clear_Bit(GPIO_PORTE_DIR_R,pin);
-          Set_Bit(GPIO_PORTE_PUR_R,pin);
+        //  Set_Bit(GPIO_PORTE_PUR_R,pin);
       }
    }
    break;
@@ -121,7 +121,7 @@ uint8 DIO_SetupDirection(uint8 PORT,uint8 direction,uint8 pin){
       }
       else if(direction == IN){
           Clear_Bit(GPIO_PORTF_DIR_R,pin);
-          Set_Bit(GPIO_PORTF_PUR_R,pin);
+        //  Set_Bit(GPIO_PORTF_PUR_R,pin);
       }
    }
    break;
