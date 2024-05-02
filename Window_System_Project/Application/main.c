@@ -101,19 +101,19 @@ void initTask(){
 
 // driver isr 
 void GPIOD_Handler(){
-BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-int datasend =-1;
-//from driver
-if(Get_Bit(GPIO_PORTD_MIS_R,0) == 1){ //up button
-datasend = UP;
-GPIO_PORTD_ICR_R |= 0x1;
-}
-if(Get_Bit(GPIO_PORTD_MIS_R,1)==1){ //down button
-datasend = DOWN;
-GPIO_PORTD_ICR_R |= 0x2;
-}	
-xQueueSendToBackFromISR(driverQueue, &datasend, &xHigherPriorityTaskWoken);
-portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+    int datasend =-1;
+    //from driver
+    if(Get_Bit(GPIO_PORTD_MIS_R,0) == 1){ //up button
+        datasend = UP;
+        GPIO_PORTD_ICR_R |= 0x1;
+    }
+    if(Get_Bit(GPIO_PORTD_MIS_R,1)==1){ //down button
+        datasend = DOWN;
+        GPIO_PORTD_ICR_R |= 0x2;
+    }	
+    xQueueSendToBackFromISR(driverQueue, &datasend, &xHigherPriorityTaskWoken);
+    portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
 }
 
 int main()
