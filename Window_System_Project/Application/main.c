@@ -46,9 +46,9 @@ uint8 limit_DOWN_flag = 0;
 void driverTask(void *params){
     int command;
     while(1){
-        xQueueReceive(driverQueue,&command,portMAX_DELAY);  //Wait For command
         xSemaphoreTake(xMutex,portMAX_DELAY); //check if there is a jamming emergency
         xSemaphoreGive(xMutex);
+        xQueueReceive(driverQueue,&command,portMAX_DELAY);  //Wait For command
         if(command == UP && !limit_UP_flag){ 
             MOTOR_rotate(PORT_F,PIN1,PORT_F,PIN2);
             vTaskDelay(200);
@@ -89,9 +89,9 @@ void driverTask(void *params){
 void passengerTask(void *params){
     int command;
     while(1){
-        xQueueReceive(passengerQueue,&command,portMAX_DELAY); 
         xSemaphoreTake(xMutex,portMAX_DELAY);
         xSemaphoreGive(xMutex);
+        xQueueReceive(passengerQueue,&command,portMAX_DELAY); 
         if(command == UP && !limit_UP_flag){
 			MOTOR_rotate(PORT_F,PIN1,PORT_F,PIN2);
 			vTaskDelay(200);
