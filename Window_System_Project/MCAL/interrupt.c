@@ -31,8 +31,13 @@ void interrupt_init(GPIOA_Type* port,uint8 mode,uint8 pinNumber){
       Clear_Bit(port->IBE, pinNumber);
       
       Clear_Bit(port->IEV, pinNumber);
-    
-	}
+	 }
+	  
+	 else if(mode == BOTH_EDGES){
+      Clear_Bit(port->IS , pinNumber);		 
+		 
+      Set_Bit(port->IBE, pinNumber);	  
+	 }
 
     
     //clear prior interrupts
@@ -99,6 +104,12 @@ void interrupt_enable_pin(GPIOA_Type* port, uint8 pin_num){
   if(pin_num > 7){
   }
 	Set_Bit(port->IM,pin_num);
+
+}
+
+void interrupt_disable_pin(GPIOA_Type* port, uint8 pin_num){
+	
+	Clear_Bit(port->IM,pin_num);	
 }
 
 
