@@ -235,6 +235,7 @@ void GPIOB_Handler(){
 	else if(Get_Bit(GPIO_PORTB_MIS_R,LIMIT_UP_PIN)==1){
 		if(DIO_ReadPin(LIMIT_UP_PORT,LIMIT_UP_PIN) == 0){ //Falling Edge
 			MOTOR_stop(MOTOR_PORT,MOTOR_FIRST_PIN,MOTOR_PORT,MOTOR_SECOND_PIN);
+			motorRunning = 0;
 			limit_UP_flag = 1;
 		}
 		else if(DIO_ReadPin(LIMIT_UP_PORT,LIMIT_UP_PIN) == 1){
@@ -246,6 +247,7 @@ void GPIOB_Handler(){
 	else if(Get_Bit(GPIO_PORTB_MIS_R,LIMIT_DOWN_PIN)==1){
 		if(DIO_ReadPin(LIMIT_DOWN_PORT,LIMIT_DOWN_PIN) == 0){ //Falling Edge
 			MOTOR_stop(MOTOR_PORT,MOTOR_FIRST_PIN,MOTOR_PORT,MOTOR_SECOND_PIN);
+			motorRunning = 0;
 			limit_DOWN_flag = 1;
 		}
 		else if(DIO_ReadPin(LIMIT_DOWN_PORT,LIMIT_DOWN_PIN) == 1){
