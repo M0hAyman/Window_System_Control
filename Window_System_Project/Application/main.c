@@ -10,9 +10,9 @@
 #define UP 0
 #define DOWN 1
 
-#define DRIVER_PORT       PORT_D
-#define DRIVER_UP_PIN     PIN0
-#define DRIVER_DOWN_PIN   PIN1
+#define DRIVER_PORT       PORT_A
+#define DRIVER_UP_PIN     PIN2
+#define DRIVER_DOWN_PIN   PIN3
 
 #define PASSENGER_PORT     PORT_D
 #define PASSENGER_UP_PIN   PIN2 
@@ -44,42 +44,31 @@ uint8 limit_DOWN_flag = 0;
 
 
 void driverTask(void *params){
-    int command;
+    uint8 command;
     while(1){
-        xSemaphoreTake(xMutex,portMAX_DELAY); //check if there is a jamming emergency
-        xSemaphoreGive(xMutex);
+
         xQueueReceive(driverQueue,&command,portMAX_DELAY);  //Wait For command
+		if (xSemaphoreTake(xMutex,0) == pdFALSE) continue;
+        xSemaphoreGive(xMutex);
         if(command == UP && !limit_UP_flag){ 
             MOTOR_rotate(PORT_F,PIN1,PORT_F,PIN2);
             vTaskDelay(200);
-                if (DIO_ReadPin(PORT_D,PIN0)==0){
-                    while(DIO_ReadPin(PORT_D,PIN0)==0);
+                if (DIO_ReadPin(DRIVER_PORT,DRIVER_UP_PIN)==0){
+                    while(DIO_ReadPin(DRIVER_PORT,DRIVER_UP_PIN)==0);
                     MOTOR_stop(PORT_F,PIN1,PORT_F,PIN2);
                 
                 }   
-                else if(motorRunning){ //Second press in auto mode turns the motor off
-                    MOTOR_stop(PORT_F,PIN1,PORT_F,PIN2);	
-                    motorRunning = 0;
-                }
-                else{
-					motorRunning = 1;
-                }					
+		
         }
 
         else if(command == DOWN && !limit_DOWN_flag){
             MOTOR_rotateOpposite(PORT_F,PIN1,PORT_F,PIN2);
             vTaskDelay(200);
-                if (DIO_ReadPin(PORT_D,PIN1)==0){
-                    while(DIO_ReadPin(PORT_D,PIN1)==0);
+                if (DIO_ReadPin(DRIVER_PORT,DRIVER_DOWN_PIN)==0){
+                    while(DIO_ReadPin(DRIVER_PORT,DRIVER_DOWN_PIN)==0);
                     MOTOR_stop(PORT_F,PIN1,PORT_F,PIN2);
                 }
-				else if(motorRunning){ //Second press in auto mode turns the motor off
-                    MOTOR_stop(PORT_F,PIN1,PORT_F,PIN2);	
-                    motorRunning = 0;
-                }
-                 else{
-					motorRunning = 1;
-				 }					 
+				 
         }
 
 
@@ -87,43 +76,33 @@ void driverTask(void *params){
 }
 
 void passengerTask(void *params){
-    int command;
+    uint8 command;
     while(1){
-        xSemaphoreTake(xMutex,portMAX_DELAY);
-        xSemaphoreGive(xMutex);
+
+
         xQueueReceive(passengerQueue,&command,portMAX_DELAY); 
+		if (xSemaphoreTake(xMutex,0) == pdFALSE) continue;
+		xSemaphoreGive(xMutex);
         if(command == UP && !limit_UP_flag){
 			MOTOR_rotate(PORT_F,PIN1,PORT_F,PIN2);
 			vTaskDelay(200);
-            if (DIO_ReadPin(PORT_D,PIN0)==0){
-                while(DIO_ReadPin(PORT_D,PIN0)==0);
+            if (DIO_ReadPin(PASSENGER_PORT,PASSENGER_UP_PIN)==0){
+                while(DIO_ReadPin(PASSENGER_PORT,PASSENGER_UP_PIN)==0);
                 MOTOR_stop(PORT_F,PIN1,PORT_F,PIN2);
             
             }
-            else if(motorRunning){ //Second press in auto mode turns the motor off
-                MOTOR_stop(PORT_F,PIN1,PORT_F,PIN2);	
-                motorRunning = 0;
-            }
-            else{
-			    motorRunning = 1;
-			}		
+
         }
 
         else if(command == DOWN && !limit_DOWN_flag){
 			MOTOR_rotateOpposite(PORT_F,PIN1,PORT_F,PIN2);
 			vTaskDelay(200);
-            if (DIO_ReadPin(PORT_D,PIN1)==0){
-                while(DIO_ReadPin(PORT_D,PIN1)==0);
+            if (DIO_ReadPin(PASSENGER_PORT,PASSENGER_DOWN_PIN)==0){
+                while(DIO_ReadPin(PASSENGER_PORT,PASSENGER_DOWN_PIN)==0);
                 MOTOR_stop(PORT_F,PIN1,PORT_F,PIN2);
             
             }
-			else if(motorRunning){ //Second press in auto mode turns the motor off
-                MOTOR_stop(PORT_F,PIN1,PORT_F,PIN2);	
-                motorRunning = 0;
-            }
-            else{
-				motorRunning = 1;
-			}		  
+
         }
     }
 }
@@ -135,7 +114,7 @@ void jammingTask(void* params){
 		xSemaphoreTake(xSemaphore,portMAX_DELAY);
 		MOTOR_rotateOpposite(MOTOR_PORT,MOTOR_FIRST_PIN,MOTOR_PORT,MOTOR_SECOND_PIN);
         xSemaphoreTake(xMutex,portMAX_DELAY); //check if there is a jamming emergency
-		vTaskDelay(pdMS_TO_TICKS(500));
+		vTaskDelay(pdMS_TO_TICKS(1500));
 		MOTOR_stop(PORT_F,PIN1,PORT_F,PIN2);
 		xSemaphoreGive(xMutex);
 		xQueueReceive(driverQueue,&dummy,0);
@@ -145,22 +124,25 @@ void jammingTask(void* params){
 }
 
 void initTask(){
-	DIO_Init(PORT_D);
+	DIO_Init(PASSENGER_PORT);
+	DIO_Init(PORT_F);
+	DIO_Init(DRIVER_PORT);
+	DIO_SetupDirection(PORT_F,OUT,PIN3);
 	DIO_Init(LOCK_PORT);
 	MOTOR_direction_init(PORT_F,PIN1,PORT_F,PIN2);
 	
-	DIO_SetupDirection(PORT_D,IN,DRIVER_UP_PIN);
-	DIO_SetupDirection(PORT_D,IN,DRIVER_DOWN_PIN);
-	DIO_SetupDirection(PORT_D,IN,PASSENGER_UP_PIN);
-	DIO_SetupDirection(PORT_D,IN,PASSENGER_DOWN_PIN);
+	DIO_SetupDirection(DRIVER_PORT,IN,DRIVER_UP_PIN);
+	DIO_SetupDirection(DRIVER_PORT,IN,DRIVER_DOWN_PIN);
+	DIO_SetupDirection(PASSENGER_PORT,IN,PASSENGER_UP_PIN);
+	DIO_SetupDirection(PASSENGER_PORT,IN,PASSENGER_DOWN_PIN);
 	
-	interrupt_init(GPIOD,FALLING_EDGE,DRIVER_UP_PIN);
-	interrupt_init(GPIOD,FALLING_EDGE,DRIVER_DOWN_PIN);
+	interrupt_init(GPIOA,FALLING_EDGE,DRIVER_UP_PIN);
+	interrupt_init(GPIOA,FALLING_EDGE,DRIVER_DOWN_PIN);
 	interrupt_init(GPIOD,FALLING_EDGE,PASSENGER_UP_PIN);
 	interrupt_init(GPIOD,FALLING_EDGE,PASSENGER_DOWN_PIN);
 	
-	interrupt_enable_pin(GPIOD,DRIVER_UP_PIN);
-	interrupt_enable_pin(GPIOD,DRIVER_DOWN_PIN);
+	interrupt_enable_pin(GPIOA,DRIVER_UP_PIN);
+	interrupt_enable_pin(GPIOA,DRIVER_DOWN_PIN);
 	interrupt_enable_pin(GPIOD,PASSENGER_UP_PIN);
 	interrupt_enable_pin(GPIOD,PASSENGER_DOWN_PIN);
 	
@@ -183,31 +165,40 @@ void initTask(){
 // driver & Passenger isr 
 void GPIOD_Handler(){
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-    int datasend =-1;
+    uint8 datasend =-1;
     //from driver
-    if(Get_Bit(GPIO_PORTD_MIS_R,DRIVER_UP_PIN) == 1){ //up button
-        datasend = UP;
-        Set_Bit(GPIO_PORTD_ICR_R,DRIVER_UP_PIN);
-        xQueueSendToBackFromISR(driverQueue, &datasend, &xHigherPriorityTaskWoken);
-    }
-    else if(Get_Bit(GPIO_PORTD_MIS_R,DRIVER_DOWN_PIN)==1){ //down button
-        datasend = DOWN;
-        Set_Bit(GPIO_PORTD_ICR_R,DRIVER_DOWN_PIN);
-        xQueueSendToBackFromISR(driverQueue, &datasend, &xHigherPriorityTaskWoken);
-    }	
+
 	//from Passenger
-	else if(Get_Bit(GPIO_PORTD_MIS_R,PASSENGER_UP_PIN) == 1){ //up button
+ 	if((Get_Bit(GPIO_PORTD_MIS_R,PASSENGER_UP_PIN) == 1)){ //up button
         datasend = UP;
         Set_Bit(GPIO_PORTD_ICR_R,PASSENGER_UP_PIN);
 	    xQueueSendToBackFromISR(passengerQueue, &datasend, &xHigherPriorityTaskWoken);
     }
-    else if(Get_Bit(GPIO_PORTD_MIS_R,PASSENGER_DOWN_PIN)==1){ //down button
+    else if((Get_Bit(GPIO_PORTD_MIS_R,PASSENGER_DOWN_PIN)==1)){ //down button
         datasend = DOWN;
         Set_Bit(GPIO_PORTD_ICR_R,PASSENGER_DOWN_PIN);
 		xQueueSendToBackFromISR(passengerQueue, &datasend, &xHigherPriorityTaskWoken);
     }	
 
     portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
+}
+
+void GPIOA_Handler(){
+	
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+    uint8 datasend =-1;
+	if(Get_Bit(GPIO_PORTA_MIS_R,DRIVER_UP_PIN) == 1){ //up button
+        datasend = UP;
+        Set_Bit(GPIO_PORTA_ICR_R,DRIVER_UP_PIN);
+        xQueueSendToBackFromISR(driverQueue, &datasend, &xHigherPriorityTaskWoken);
+    }
+    else if(Get_Bit(GPIO_PORTA_MIS_R,DRIVER_DOWN_PIN)==1){ //down button
+        datasend = DOWN;
+        Set_Bit(GPIO_PORTA_ICR_R,DRIVER_DOWN_PIN);
+        xQueueSendToBackFromISR(driverQueue, &datasend, &xHigherPriorityTaskWoken);
+    }	
+	
+	
 }
 
 //Driver Lock ISR
@@ -217,17 +208,25 @@ void GPIOB_Handler(){
     if(Get_Bit(GPIO_PORTB_MIS_R,LOCK_PIN)==1){ //down button
 		if(DIO_ReadPin(LOCK_PORT,LOCK_PIN) == 0){ //Falling Edge
 			interrupt_disable_pin(GPIOD,PASSENGER_UP_PIN);
-			interrupt_disable_pin(GPIOD,PASSENGER_DOWN_PIN);			
+			interrupt_disable_pin(GPIOD,PASSENGER_DOWN_PIN);
+	
 		}
 		else if(DIO_ReadPin(LOCK_PORT,LOCK_PIN) == 1){
+ 
+            //clear previous passenger interrupts
+            Set_Bit(GPIO_PORTD_ICR_R,PASSENGER_DOWN_PIN);
+			Set_Bit(GPIO_PORTD_ICR_R,PASSENGER_UP_PIN);
+			
 			interrupt_enable_pin(GPIOD,PASSENGER_UP_PIN);
-			interrupt_enable_pin(GPIOD,PASSENGER_DOWN_PIN);					
+			interrupt_enable_pin(GPIOD,PASSENGER_DOWN_PIN);		
+
 		}
 	    Set_Bit(GPIO_PORTB_ICR_R,LOCK_PIN);
     }
 	//Jamming
 	else if(Get_Bit(GPIO_PORTB_MIS_R,JAMMING_PIN)==1){
 		xSemaphoreGiveFromISR(xSemaphore,&xHigherPriorityTaskWoken);
+		//DIO_TogglePin(PORT_F,PIN3);
 	    Set_Bit(GPIO_PORTB_ICR_R,JAMMING_PIN);		
 	}
 	
@@ -235,10 +234,12 @@ void GPIOB_Handler(){
 	else if(Get_Bit(GPIO_PORTB_MIS_R,LIMIT_UP_PIN)==1){
 		if(DIO_ReadPin(LIMIT_UP_PORT,LIMIT_UP_PIN) == 0){ //Falling Edge
 			MOTOR_stop(MOTOR_PORT,MOTOR_FIRST_PIN,MOTOR_PORT,MOTOR_SECOND_PIN);
+			//DIO_WritePin(PORT_F,LOGIC_HIGH,PIN1);
 			motorRunning = 0;
 			limit_UP_flag = 1;
 		}
 		else if(DIO_ReadPin(LIMIT_UP_PORT,LIMIT_UP_PIN) == 1){
+			//DIO_WritePin(PORT_F,LOGIC_LOW,PIN1);
 			limit_UP_flag = 0;
 		}
 	    Set_Bit(GPIO_PORTB_ICR_R,LIMIT_UP_PIN);	
@@ -247,10 +248,12 @@ void GPIOB_Handler(){
 	else if(Get_Bit(GPIO_PORTB_MIS_R,LIMIT_DOWN_PIN)==1){
 		if(DIO_ReadPin(LIMIT_DOWN_PORT,LIMIT_DOWN_PIN) == 0){ //Falling Edge
 			MOTOR_stop(MOTOR_PORT,MOTOR_FIRST_PIN,MOTOR_PORT,MOTOR_SECOND_PIN);
+		    DIO_WritePin(PORT_F,LOGIC_HIGH,PIN2);
 			motorRunning = 0;
 			limit_DOWN_flag = 1;
 		}
 		else if(DIO_ReadPin(LIMIT_DOWN_PORT,LIMIT_DOWN_PIN) == 1){
+			DIO_WritePin(PORT_F,LOGIC_LOW,PIN2);
 			limit_DOWN_flag = 0;
 		}
 	    Set_Bit(GPIO_PORTB_ICR_R,LIMIT_DOWN_PIN);	

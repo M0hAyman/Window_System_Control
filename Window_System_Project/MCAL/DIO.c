@@ -9,6 +9,7 @@ uint8 DIO_Init(uint8 PORT)
     while((SYSCTL_PRGPIO_R&0x00000001) == 0){};
     GPIO_PORTA_LOCK_R=0X4C4F434B;
     GPIO_PORTA_CR_R=0XFF;
+	GPIO_PORTA_DEN_R = 0xFF;
     break;
   case 'B':
     SYSCTL_RCGCGPIO_R|=0X00000002;
