@@ -56,7 +56,8 @@ void driverTask(void *params){
                 if (DIO_ReadPin(DRIVER_PORT,DRIVER_UP_PIN)==0){
                     while(DIO_ReadPin(DRIVER_PORT,DRIVER_UP_PIN)==0);
                     MOTOR_stop(PORT_F,PIN1,PORT_F,PIN2);
-                
+					vTaskDelay(50);
+					xQueueReceive(driverQueue,&command,0);                 
                 }   
 		
         }
@@ -67,6 +68,8 @@ void driverTask(void *params){
                 if (DIO_ReadPin(DRIVER_PORT,DRIVER_DOWN_PIN)==0){
                     while(DIO_ReadPin(DRIVER_PORT,DRIVER_DOWN_PIN)==0);
                     MOTOR_stop(PORT_F,PIN1,PORT_F,PIN2);
+										vTaskDelay(50);
+					xQueueReceive(driverQueue,&command,0);      
                 }
 				 
         }
@@ -89,7 +92,8 @@ void passengerTask(void *params){
             if (DIO_ReadPin(PASSENGER_PORT,PASSENGER_UP_PIN)==0){
                 while(DIO_ReadPin(PASSENGER_PORT,PASSENGER_UP_PIN)==0);
                 MOTOR_stop(PORT_F,PIN1,PORT_F,PIN2);
-            
+				vTaskDelay(50);
+				xQueueReceive(passengerQueue,&command,0);           
             }
 
         }
@@ -100,6 +104,8 @@ void passengerTask(void *params){
             if (DIO_ReadPin(PASSENGER_PORT,PASSENGER_DOWN_PIN)==0){
                 while(DIO_ReadPin(PASSENGER_PORT,PASSENGER_DOWN_PIN)==0);
                 MOTOR_stop(PORT_F,PIN1,PORT_F,PIN2);
+				vTaskDelay(50);
+				xQueueReceive(passengerQueue,&command,0);   
             
             }
 
@@ -146,7 +152,7 @@ void initTask(){
 	interrupt_enable_pin(GPIOD,PASSENGER_UP_PIN);
 	interrupt_enable_pin(GPIOD,PASSENGER_DOWN_PIN);
 	
-	DIO_SetupDirection(PORT_B,IN,LOCK_PIN);
+	/*DIO_SetupDirection(PORT_B,IN,LOCK_PIN);
 	DIO_SetupDirection(PORT_B,IN,JAMMING_PIN);
 	DIO_SetupDirection(PORT_B,IN,LIMIT_UP_PIN);
 	DIO_SetupDirection(PORT_B,IN,LIMIT_DOWN_PIN);	
@@ -159,7 +165,7 @@ void initTask(){
 	interrupt_enable_pin(GPIOB,LOCK_PIN);
 	interrupt_enable_pin(GPIOB,JAMMING_PIN);
 	interrupt_enable_pin(GPIOB,LIMIT_UP_PIN);
-	interrupt_enable_pin(GPIOB,LIMIT_DOWN_PIN);
+	interrupt_enable_pin(GPIOB,LIMIT_DOWN_PIN);*/
 }
 
 // driver & Passenger isr 
