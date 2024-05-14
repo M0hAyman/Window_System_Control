@@ -125,6 +125,8 @@ void jammingTask(void* params){
 		xSemaphoreGive(xMutex);
 		xQueueReceive(driverQueue,&dummy,0);
 		xQueueReceive(passengerQueue,&dummy,0);	
+		vTaskDelay(50);
+		xSemaphoreTake(xSemaphore,0);
 	}
 	
 }
@@ -152,7 +154,7 @@ void initTask(){
 	interrupt_enable_pin(GPIOD,PASSENGER_UP_PIN);
 	interrupt_enable_pin(GPIOD,PASSENGER_DOWN_PIN);
 	
-	/*DIO_SetupDirection(PORT_B,IN,LOCK_PIN);
+	DIO_SetupDirection(PORT_B,IN,LOCK_PIN);
 	DIO_SetupDirection(PORT_B,IN,JAMMING_PIN);
 	DIO_SetupDirection(PORT_B,IN,LIMIT_UP_PIN);
 	DIO_SetupDirection(PORT_B,IN,LIMIT_DOWN_PIN);	
@@ -165,7 +167,7 @@ void initTask(){
 	interrupt_enable_pin(GPIOB,LOCK_PIN);
 	interrupt_enable_pin(GPIOB,JAMMING_PIN);
 	interrupt_enable_pin(GPIOB,LIMIT_UP_PIN);
-	interrupt_enable_pin(GPIOB,LIMIT_DOWN_PIN);*/
+	interrupt_enable_pin(GPIOB,LIMIT_DOWN_PIN);
 }
 
 // driver & Passenger isr 
@@ -254,12 +256,12 @@ void GPIOB_Handler(){
 	else if(Get_Bit(GPIO_PORTB_MIS_R,LIMIT_DOWN_PIN)==1){
 		if(DIO_ReadPin(LIMIT_DOWN_PORT,LIMIT_DOWN_PIN) == 0){ //Falling Edge
 			MOTOR_stop(MOTOR_PORT,MOTOR_FIRST_PIN,MOTOR_PORT,MOTOR_SECOND_PIN);
-		    DIO_WritePin(PORT_F,LOGIC_HIGH,PIN2);
+		    //DIO_WritePin(PORT_F,LOGIC_HIGH,PIN2);
 			motorRunning = 0;
 			limit_DOWN_flag = 1;
 		}
 		else if(DIO_ReadPin(LIMIT_DOWN_PORT,LIMIT_DOWN_PIN) == 1){
-			DIO_WritePin(PORT_F,LOGIC_LOW,PIN2);
+			//DIO_WritePin(PORT_F,LOGIC_LOW,PIN2);
 			limit_DOWN_flag = 0;
 		}
 	    Set_Bit(GPIO_PORTB_ICR_R,LIMIT_DOWN_PIN);	
